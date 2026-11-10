@@ -1,5 +1,5 @@
 // 앱 파일을 수정해서 다시 올릴 때는 아래 버전 숫자를 올려 주세요 (v1 → v2).
-const V = "bible-tracker-v1";
+const V = "bible-tracker-v2";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

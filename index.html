@@ -25,8 +25,11 @@
     d.appendChild(h);d.appendChild(p);d.appendChild(m);d.appendChild(b);
     document.documentElement.appendChild(d);
   }
-  window.addEventListener("error",function(e){show((e.message||"error")+(e.lineno?" (줄 "+e.lineno+")":""))});
-  window.addEventListener("unhandledrejection",function(e){show(e.reason&&e.reason.message?e.reason.message:e.reason)});
+  window.addEventListener("error",function(e){
+    // 이 페이지 자체의 오류만 표시해요. 공유 시트·확장 프로그램 등 외부에서 생긴 오류("Script error.")는 무시해요.
+    if(!e.filename||e.filename.indexOf(location.origin)!==0||!e.lineno)return;
+    show((e.message||"error")+" (줄 "+e.lineno+")");
+  });
 })();
 </script>
 <meta name="theme-color" content="#1f6f6b">
@@ -150,7 +153,7 @@ const today=()=>fmt(new Date());
 let S={done:{}};
 try{const r=JSON.parse(localStorage.getItem(KEY)||"null");if(r&&r.done)S=r}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){})}catch(e){}
 
 function skipSet(b){const s=new Set();(b[2]||[]).forEach(x=>{if(Array.isArray(x)){for(let i=x[0];i<=x[1];i++)s.add(i)}else s.add(x)});return s}
 const books=[...OT.map(b=>({n:b[0],c:b[1],s:skipSet(b),t:"ot"})),...NT.map(b=>({n:b[0],c:b[1],s:skipSet(b),t:"nt"}))];

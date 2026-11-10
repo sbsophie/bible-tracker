@@ -4,6 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>성경 완독 진행표</title>
+<script>
+// 오류가 나면 하얀 화면 대신 원인을 보여줘요.
+(function(){
+  function show(msg){
+    if(document.getElementById("errbox"))return;
+    var d=document.createElement("div");d.id="errbox";
+    d.style.cssText="position:fixed;left:0;top:0;right:0;bottom:0;z-index:99;background:#fff;color:#111;padding:28px 22px;font:15px/1.6 -apple-system,sans-serif;overflow:auto";
+    var h=document.createElement("b");h.textContent="앱을 여는 중 문제가 생겼어요";
+    var p=document.createElement("p");p.textContent="아래 버튼을 눌러 보세요. 읽은 기록은 지워지지 않아요.";
+    var m=document.createElement("p");m.style.cssText="color:#a00;font-size:12px;word-break:break-all";m.textContent=String(msg);
+    var b=document.createElement("button");b.textContent="저장된 앱 파일 비우고 다시 불러오기";
+    b.style.cssText="font:inherit;padding:12px 16px;border-radius:10px;border:1px solid #999;background:#f3f3f3";
+    b.onclick=function(){
+      var jobs=[];
+      if(navigator.serviceWorker)jobs.push(navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}));
+      if(window.caches)jobs.push(caches.keys().then(function(k){return Promise.all(k.map(function(x){return caches.delete(x)}))}));
+      Promise.all(jobs).catch(function(){}).then(function(){location.reload()});
+    };
+    d.appendChild(h);d.appendChild(p);d.appendChild(m);d.appendChild(b);
+    document.documentElement.appendChild(d);
+  }
+  window.addEventListener("error",function(e){show((e.message||"error")+(e.lineno?" (줄 "+e.lineno+")":""))});
+  window.addEventListener("unhandledrejection",function(e){show(e.reason&&e.reason.message?e.reason.message:e.reason)});
+})();
+</script>
 <meta name="theme-color" content="#1f6f6b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,7 +41,8 @@
 :root{--bg:#eef1ee;--surface:#fafbf9;--ink:#1f2a27;--muted:#66726e;--line:#d3dad6;--read:#1f6f6b;--gold:#c9962b;--skip:#c9d0cc;color-scheme:light;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root{--bg:#121a18;--surface:#1a2421;--ink:#e6ece9;--muted:#93a19c;--line:#2e3b37;--read:#4fb3ac;--gold:#e0b24d;--skip:#33403c;color-scheme:dark}}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
 main{max-width:760px;margin:0 auto;padding:16px 16px 48px}
@@ -186,8 +212,8 @@ function setTab(t){
   $("tab-ot").classList.toggle("on",t==="ot");$("tab-nt").classList.toggle("on",t==="nt");
   try{localStorage.setItem(KEY+"-tab",t)}catch(e){}
 }
-$("tab-ot").onclick=()=>{setTab("ot");$("listtop").scrollIntoView({behavior:"smooth",block:"start"})};
-$("tab-nt").onclick=()=>{setTab("nt");$("listtop").scrollIntoView({behavior:"smooth",block:"start"})};
+$("tab-ot").onclick=()=>setTab("ot");
+$("tab-nt").onclick=()=>setTab("nt");
 try{setTab(localStorage.getItem(KEY+"-tab")==="nt"?"nt":"ot")}catch(e){}
 const topBtn=$("totop");
 addEventListener("scroll",()=>{topBtn.hidden=scrollY<400},{passive:true});
